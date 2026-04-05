@@ -1,0 +1,94 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.header {
+  background: #2d6a4f;
+  color: white;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.header h1 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  white-space: nowrap;
+  letter-spacing: -0.02em;
+}
+
+.stats-bar {
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 8px 20px;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.stat {
+  color: #4a5568;
+}
+
+.stat.available {
+  color: #276749;
+  font-weight: 600;
+}
+
+.stat.unavailable {
+  color: #9b2c2c;
+}
+
+.stat-sep {
+  color: #cbd5e0;
+}
+
+.map-container {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+}
+
+.error-banner {
+  background: #fff5f5;
+  border-bottom: 1px solid #fed7d7;
+  color: #9b2c2c;
+  padding: 8px 20px;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #2d6a4f;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #c6f6d5;
+  border-top-color: #2d6a4f;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 12px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
