@@ -1,24 +1,45 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import CampMap from './components/CampMap'
 import SearchForm from './components/SearchForm'
-import { searchParks } from './api'
+import { searchParks, prefetchFacilities } from './api'
 import './App.css'
 
 export default function App() {
-  const [parks, setParks] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [searched, setSearched] = useState(false)
+  const [parks, setParks]           = useState([])
+  const [loading, setLoading]       = useState(false)
+  const [error, setError]           = useState(null)
+  const [searched, setSearched]     = useState(false)
   const [lastSearch, setLastSearch] = useState(null)
+  const [facilitiesMap, setFacilitiesMap] = useState({}) // { [placeId]: Facility[] | null }
+  const prefetchAbort = useRef(null)
 
   async function handleSearch({ startDate, endDate, unitCategoryId }) {
+    // Cancel any in-progress prefetch from a previous search
+    prefetchAbort.current?.abort()
     setLoading(true)
     setError(null)
+    setFacilitiesMap({})
+
     try {
       const results = await searchParks({ startDate, endDate, unitCategoryId })
       setParks(results)
       setLastSearch({ startDate, endDate })
       setSearched(true)
+
+      // Prefetch facilities for all parks in the background
+      const available = results.filter(p => p.Available)
+      const controller = new AbortController()
+      prefetchAbort.current = controller
+
+      prefetchFacilities({
+        parks: results,
+        startDate,
+        endDate,
+        signal: controller.signal,
+        onResult: (placeId, facs) => {
+          setFacilitiesMap(prev => ({ ...prev, [placeId]: facs }))
+        },
+      })
     } catch (err) {
       setError(err.message)
     } finally {
@@ -26,7 +47,7 @@ export default function App() {
     }
   }
 
-  const available = parks.filter(p => p.Available)
+  const available   = parks.filter(p => p.Available)
   const unavailable = parks.filter(p => !p.Available)
 
   return (
@@ -37,9 +58,7 @@ export default function App() {
       </header>
 
       {error && (
-        <div className="error-banner">
-          Error: {error}
-        </div>
+        <div className="error-banner">Error: {error}</div>
       )}
 
       {searched && !loading && (
@@ -53,7 +72,12 @@ export default function App() {
       )}
 
       <div className="map-container">
-        <CampMap parks={parks} loading={loading} search={lastSearch} />
+        <CampMap
+          parks={parks}
+          loading={loading}
+          search={lastSearch}
+          facilitiesMap={facilitiesMap}
+        />
       </div>
     </div>
   )
